@@ -16,6 +16,7 @@ Objective:
   when they come in contact.
 - The portal to the next level only unlocks when all the Java(s) have been
   killed
+  THIS IS THROW AWAY, JUST AN EXAMPLE
 */
 
 const blob = "a";
