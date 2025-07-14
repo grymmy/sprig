@@ -267,53 +267,42 @@ def comment(pr):
     if len(comment) == 0:
         comment = "Please add more complexity to this game to justify a Sprig device grant"
         print("WARNING!  Using default message: " + comment)
-    
-    # Check if we already have an existing review from the current user
-    existing_reviews = list(pr.get_reviews())
-    current_user = g.get_user().login
-    already_requested_changes = any(
-        r.user.login == current_user and r.state == "CHANGES_REQUESTED" 
-        for r in existing_reviews
-    )
-    
     while 1:
-        if already_requested_changes:
-            print("You already have a 'Changes Requested' review on this PR.")
-            print("Would you like to add a regular comment with the following message?")
-            print("\"%s\"" % (comment))
-            print("(y/n) ", end="", flush=True)
-            match get_char():
-                case "n":
-                    return
-                case "y": 
-                    pr.create_issue_comment(comment)
-                    print("Regular comment added successfully.")
-                    return
-                case _:
-                    continue
-        else:
-            print("Would you like to request changes to the PR with the following comment?")
-            print("\"%s\"" % (comment))
-            print("(y/n) ", end="", flush=True)
-            match get_char():
-                case "n":
-                    return
-                case "y": 
-                    try:
-                        pr.create_review(
-                            body=comment,
-                            event="REQUEST_CHANGES"  # This marks the PR as "Changes Requested"
-                        )
-                        print("Review with changes requested created successfully.")
-                        return
-                    except Exception as e:
-                        print(f"Error creating review: {str(e)}")
-                        print("Falling back to creating a regular comment...")
-                        pr.create_issue_comment(comment)
-                        print("Regular comment added successfully.")
-                        return
-                case _:
-                    continue
+
+        print("Would you like to request changes to the PR with the following comment?")
+        print("\"%s\"" % (comment))
+        print("(y/n) ", end="", flush=True)
+        match get_char():
+            case "n":
+                return
+            case "y": 
+                pr.create_review(
+                    body=comment,
+                    event="REQUEST_CHANGES"  # This marks the PR as "Changes Requested"
+                )
+                return
+            case _:
+                continue
+
+def close_pr(pr):
+    print("Please add a comment for the closing of this PR: ", end = "", flush = True)
+    comment = sys.stdin.readline().strip()
+    if len(comment) == 0:
+        comment = "Closing this as it has unresolved commentary, and is also very old."
+        print("WARNING!  Using default message: " + comment)
+    while 1:
+
+        print("Would you like to close the PR with the following comment?")
+        print("\"%s\"" % (comment))
+        print("(y/n) ", end="", flush=True)
+        match get_char():
+            case "n":
+                return
+            case "y":
+                actually_close_pr_with_comment(pr, comment)
+                return
+            case _:
+                continue
 
 
 def show_comments(pr):
@@ -525,26 +514,6 @@ def process_pr(pr):
                 show_commands()
                 continue
 
-
-def close_pr(pr):
-    print("Please add a comment for the closing of this PR: ", end = "", flush = True)
-    comment = sys.stdin.readline().strip()
-    if len(comment) == 0:
-        comment = "Closing this as it has unresolved commentary, and is also very old."
-        print("WARNING!  Using default message: " + comment)
-    while 1:
-
-        print("Would you like to close the PR with the following comment?")
-        print("\"%s\"" % (comment))
-        print("(y/n) ", end="", flush=True)
-        match get_char():
-            case "n":
-                return
-            case "y":
-                actually_close_pr_with_comment(pr, comment)
-                return
-            case _:
-                continue
 
 
 # Print PR details
